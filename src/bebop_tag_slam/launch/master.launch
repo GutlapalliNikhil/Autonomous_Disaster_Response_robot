@@ -1,0 +1,134 @@
+<launch>
+<!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="multi_robot_name" default=""/>
+  <arg name="launch_prefix" default="" />
+  <arg name="camera_name" default="/camera" />
+  <arg name="image_topic" default="image" />
+  <arg name="queue_size" default="10" />
+  <arg name="cmd_vel_topic" default="/cmd_vel" />
+  <arg name="odom_topic" default="odom" />
+  <arg name="move_forward_only" default="false"/>
+<!-- __________________________________________________________________________________________________________________________________ -->
+<!-- Launching Robot state publisher node and camera_link tf -->
+
+  <!-- publishing the static transformation of camera_link  -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" args="0.032 0.0 0.11 0.5 0.5 0.5 0.5 base_link camera_link" />
+
+  <!-- Include turtlebot3_bringup launch file -->
+  <include file="$(find bebop_tag_slam)/launch/includes/description.launch.xml">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+    <param name="tf_prefix" value="$(arg multi_robot_name)"/>
+  </node>
+<!-- __________________________________________________________________________________________________________________________________ -->
+<!-- Launching Cartographer node and generating occupancy grid maps -->
+
+    <!-- cartographer_node -->
+  <node pkg="cartographer_ros" type="cartographer_node" name="cartographer_node" 
+        args="-configuration_directory $(find turtlebot3_slam)/config
+              -configuration_basename $(arg configuration_basename)"
+        output="screen">
+    <remap from="/imu" to="/flat_imu"/>
+  </node>
+
+  <!-- cartographer_occupancy_grid_node -->
+  <node pkg="cartographer_ros" type="cartographer_occupancy_grid_node"
+      name="cartographer_occupancy_grid_node" 
+      args="-resolution 0.05" >
+    <remap from="/map" to="/map_updater"/>
+  </node>
+  
+  <!-- flat_world_imu_node -->
+  <node pkg="turtlebot3_slam" type="flat_world_imu_node" name="flat_world_imu_node" output="screen">
+    <remap from="imu_in" to="/imu" />
+    <remap from="imu_out" to="/flat_imu" />
+  </node>
+
+  <!-- Launch script to generate Occupancy map for cartographer -->
+  <node pkg="bebop_tag_slam" type="map_republisher.py" name="map_cartographer" output="screen" />
+
+  <!-- Launch GTSAM Node to improve map and pose data -->
+  <node pkg="bebop_tag_slam" type="map_pose_optimizer.py" name="gtsam_slam_node" output="screen" />
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find bebop_tag_slam)/config/turtlebot3_cartographer.rviz"/>
+  </group>
+<!-- _________________________________________________________________________________________________________________________________ -->
+<!-- Launching the ros_apriltag node to detect April tags in maps and performing the transformation wrt /map -->
+
+  <!-- Launch bebop_tag_slam nodes -->
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag_ros_continuous_node" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)">
+ 
+    <!-- Remap topics from those used in code to those on the ROS network -->
+    <remap from="image_rect" to="$(arg camera_name)/$(arg image_topic)" />
+    <remap from="camera_info" to="$(arg camera_name)/camera_info" />
+    <param name="image_transport" value="compressed"/>
+    
+    <param name="publish_tag_detections_image" type="bool" value="true" /><!-- default: false -->
+    <param name="queue_size" type="int" value="$(arg queue_size)" />
+
+    <rosparam command="load" file="$(find bebop_tag_slam)/config/settings.yaml"/>
+    <rosparam command="load" file="$(find bebop_tag_slam)/config/tags.yaml"/>
+  </node>
+
+  <!-- Launch bebop_tag_slam -->
+  <node pkg="bebop_tag_slam" type="tag_processing_node.py" name="tag_tracking_node" output="screen" />
+  
+  <!-- Launch rqt_image_viewer -->
+  <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_viewer" />
+
+
+  <!-- Launch GTSAM Node to improve map and pose data -->
+  <!-- <node pkg="bebop_tag_slam" type="map_pose_optimizer.py" name="gtsam_slam_node" output="screen" /> -->
+
+<!-- __________________________________________________________________________________________________________________________________ -->
+<!-- launching explore_lite node -->
+
+  <!-- Launch explore_lite file -->
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+    <param name="robot_base_frame" value="base_link"/>
+    <param name="costmap_topic" value="map"/>
+    <param name="costmap_updates_topic" value="map_updates"/>
+    <param name="visualize" value="true"/>
+    <param name="planner_frequency" value="0.33"/>
+    <param name="progress_timeout" value="30.0"/>
+    <param name="potential_scale" value="3.0"/>
+    <param name="orientation_scale" value="0.0"/>
+    <param name="gain_scale" value="1.0"/>
+    <param name="transform_tolerance" value="0.3"/>
+    <param name="min_frontier_size" value="0.75"/>
+  </node>
+<!-- __________________________________________________________________________________________________________________________________ -->
+<!-- Launching the move_base node and interrupting the cmd_vel to search for the tags  -->
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find turtlebot3_navigation)/param/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find turtlebot3_navigation)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+    <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+    <remap from="cmd_vel" to="/cmd_vel_update"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+  </node>
+  <!-- script for searching for tags -->
+  <node pkg="bebop_tag_slam" type="navigator.py" name="wall_follower" output="screen" />
+  <node pkg="bebop_tag_slam" type="april_tag_explorer.py" name="april_tag_explorer" output="screen" />
+  
+  
+  <node name="map_saver_launcher" pkg="bebop_tag_slam" type="map_saver_launcher.py" output="screen" />
+<!-- __________________________________________________________________________________________________________________________________ -->
+
+</launch>

@@ -1,0 +1,24 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/stereo_image_proc/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_view/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_rotate/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_publisher/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_proc/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/camera_calibration/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/apriltag_ros/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/catkin_ws/install_isolated/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/stereo_image_proc/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_view/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_rotate/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_publisher/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/image_proc/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/camera_calibration/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/turtlebot_bebop_dev_ws/devel_isolated/apriltag_ros/lib/python3/dist-packages",
+        "/home/deep/Desktop/MR/Project/catkin_ws/install_isolated/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}

@@ -1,0 +1,80 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{TagTracker}
+\begin{algorithmic}[1]
+\State Initialize: filepath, DT, tags, TF\_ORIGIN, TF\_CAMERA
+\State Create: tf\_buffer, tf\_listener, tf\_broadcaster
+\State Generate: filepath based on datetime
+\State Subscribe: to "/tag\_detections" topic
+\State Initialize: timer callback
+
+\Function{get\_tag\_detection}{tag\_msg}
+    \If{tag\_msg.detections is empty}
+        \State \Return
+    \EndIf
+    \For{each detection in tag\_msg.detections}
+        \State Extract: tag\_id, tag\_pose
+        \State Compute: T\_AC
+        \If{T\_AC is None}
+            \State Print: "Found tag, but cannot create global transform."
+            \State \Return
+    \EndIf{tag\_id in self.tags.keys()}
+            \State Print: 'UPDATING TAG:', tag\_id
+            \State Set: L = 0.9
+            \State Update: self.tags[tag\_id] using weighted sum of current and new T\_AO
+        \Else
+            \State Print: 'FOUND NEW TAG:', tag\_id
+            \State Add: new tag to self.tags with T\_AO value
+        \EndIf
+    \EndFor
+\EndFunction
+
+\Function{get\_transform}{TF\_TO, TF\_FROM}
+    \Try
+        \State Compute: pose by looking up transform
+    \Except
+        \State Print: "Transform not found."
+        \State \Return None
+    \EndTry
+    \State Compute: transformT, transformQ
+    \State \Return Transformation Matrix
+\EndFunction
+
+\Function{timer\_callback}{event}
+    \State Call: publish\_tf()
+    \State Call: save\_tags\_to\_file(tags)
+\EndFunction
+
+\Function{publish\_tf}{}
+    \For{each tag\_id, T\_AO in tags}
+        \State Create: TransformStamped t
+        \State Set: t's attributes
+        \State Send: Transform t with tf\_broadcaster
+    \EndFor
+\EndFunction
+
+\Function{save\_tags\_to\_file}{tags}
+    \If{tags is empty}
+        \State \Return
+    \EndIf
+    \State Prepare: data\_for\_file
+    \State Save: data\_for\_file to filepath
+\EndFunction
+
+\Function{main}{}
+    \State Initialize: rospy node
+    \State Create: tag\_tracker
+    \State Start: rospy.spin()
+\EndFunction
+
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

@@ -1,0 +1,56 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{Wall Follower}
+\begin{algorithmic}[1]
+    \Procedure{Initialization}{}
+        \State Initialize map, scan, and pose data
+        \State Set exploring flag to False
+        \State Set default values for ROS parameters
+        \State Subscribe to topics and create action client
+    \EndProcedure
+    \Procedure{map\_callback}{msg}
+        \State Update map data
+    \EndProcedure
+    \Procedure{scan\_callback}{msg}
+        \State Update scan data
+        \If{not exploring}
+            \State Publish goal
+        \EndIf
+    \EndProcedure
+    \Procedure{odom\_callback}{msg}
+        \State Update current pose
+    \EndProcedure
+    \Procedure{generate\_goal}{}
+        \If{scan and pose data available}
+            \State Classify regions based on distance
+            \State Generate goal pose based on region conditions
+            \State Check if goal is within map boundaries
+            \State Return goal if valid, else switch to exploration mode
+        \Else
+            \State Return None
+        \EndIf
+    \EndProcedure
+    \Procedure{publish\_goal}{}
+        \If{not exploring}
+            \State Generate and send goal
+        \EndIf
+    \EndProcedure
+    \Procedure{run}{}
+        \While{not rospy.is\_shutdown()}
+            \If{not exploring}
+                \State Publish goal
+            \EndIf
+            \State Sleep for the specified rate
+        \EndWhile
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

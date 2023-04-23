@@ -1,0 +1,44 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{MapProcessor}
+\begin{algorithmic}[1]
+\State Set: OBSTACLE\_THRESHOLD, UNKNOWN\_THRESHOLD
+\State Initialize: rospy node, subscriber, publisher
+
+\Function{process\_map\_data}{data, width, height}
+    \State Initialize: processed\_data
+    \For{each grid cell (x, y) in the occupancy grid}
+        \State Compute: index i based on x, y, and width
+        \State Get: cell\_value from data at index i
+        \If{cell\_value $\geq$ OBSTACLE\_THRESHOLD}
+            \State Append: 100 to processed\_data
+        \ElsIf{0 $\leq$ cell\_value $<$ UNKNOWN\_THRESHOLD}
+            \State Append: 0 to processed\_data
+        \Else
+            \State Append: -1 to processed\_data
+        \EndIf
+    \EndFor
+    \State \Return processed\_data
+\EndFunction
+
+\Function{callback}{map\_carto}
+    \State Call: process\_map\_data with map\_carto's data, width, and height
+    \State Update: map\_carto.data with processed\_data
+    \State Publish: map\_carto to '/map' topic
+\EndFunction
+
+\Function{run}{}
+    \State Start: rospy.spin()
+\EndFunction
+
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}

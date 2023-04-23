@@ -1,0 +1,38 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{AprilTag Explorer}
+\begin{algorithmic}[1]
+    \Procedure{Initialization}{}
+        \State Initialize ROS node, cmd\_pub, move\_start\_time, move\_duration, rotation\_duration, and scan\_data
+        \State Subscribe to topics
+    \EndProcedure
+    \Procedure{get\_scan\_data}{msg}
+        \State Update scan data
+    \EndProcedure
+    \Procedure{get\_command}{msg}
+        \If{Time now $\geq$ move\_start\_time + move\_duration}
+            \State Create a new Twist message with rotational velocity
+            \State Set rotation start and end times
+            \While{Time now $\leq$ rotation\_end\_time}
+                \State Log info and publish rotation command
+                \State Sleep for 0.1 seconds
+            \EndWhile
+            \State Update move\_start\_time
+        \Else
+            \State Publish received command
+        \EndIf
+    \EndProcedure
+    \Procedure{run}{}
+        \State ROS spin
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
