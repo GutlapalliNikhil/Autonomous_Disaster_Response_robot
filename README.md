@@ -4,6 +4,9 @@
 ### Background
 In this project, we apply mobile robotics principles to conduct autonomous reconnaissance in a simulated disaster scenario. Our objective is to deploy a TurtleBot3 in an unknown environment filled with AprilTags, which represent victims in the simulation. The TurtleBot must generate a comprehensive map of the area while also identifying and cataloguing all the AprilTags present, including their unique ID numbers and absolute poses relative to the generated map.
 
+[![Video Title](https://img.youtube.com/vi/UkpYMUttDLI/0.jpg)](https://www.youtube.com/watch?v=UkpYMUttDLI)
+
+
 To achieve this, the TurtleBot is outfitted with a 360-degree LiDAR scanner for localization and mapping, as well as a Raspberry Pi Camera V2 for AprilTag detection. A successful reconnaissance mission will necessitate the implementation of various techniques such as mobile robotic kinematics and sensing, feature extraction, simultaneous localization and mapping (SLAM), and motion planning. For SLAM and motion planning, we employ Cartographer_ROS and explore_lite, respectively. This integration of technology and methods will enable the robot to navigate and analyze the environment efficiently, providing valuable data for potential disaster response efforts.
 
 
