@@ -27,6 +27,8 @@ To achieve this, the TurtleBot is outfitted with a 360-degree LiDAR scanner for 
 - While the following two lines should be in the `.bashrc` of the host PC:
     * `export ROS_MASTER_URI=http://IP_ADDRESS_OF_REMOTE_PC:11311`
     * `export ROS_HOSTNAME=IP_ADDRESS_OF_REMOTE_PC`
+- Run turtlebot bringup on the robot.
+    * `roslaunch turtlebot3_bringup turtlebot3_robot.launch`
 
 2. Run `roscore` on the host PC in another terminal
 
